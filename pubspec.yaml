@@ -1,0 +1,31 @@
+name: UpcFinanceFirebase
+description: A new Flutter project.
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^2.10.0
+  firebase_auth: ^4.16.0
+  cloud_firestore: ^4.6.0  # Versión anterior que podría ser estable
+  intl: ^0.17.0
+  cupertino_icons: ^1.0.2
+  http: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^1.0.0
+
+flutter:
+  uses-material-design: true  # Permite el uso de Material Design
+  assets:
+    - assets/images/fincalc_logo.png       # Logo de la aplicación
+    - assets/images/finances_background.png  # Imagen de fondo relacionada con finanzas
+    - assets/images/default_user.png        # Imagen por defecto del usuario

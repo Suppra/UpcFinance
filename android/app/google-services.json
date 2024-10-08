@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1064502873396",
+    "project_id": "upcfinance-a4c68",
+    "storage_bucket": "upcfinance-a4c68.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1064502873396:android:f5915d8f1796075ab5e961",
+        "android_client_info": {
+          "package_name": "com.example.bovinos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPF_Kh_F1ucezwHlbDptwXo_LQjS_ypWM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
