@@ -26,11 +26,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
       Navigator.of(context).pushNamedAndRemoveUntil('/userMenu', (route) => false);
     } on FirebaseAuthException catch (e) {
       String message = 'Error al iniciar sesión';
@@ -39,7 +35,6 @@ class _LoginPageState extends State<LoginPage> {
       } else if (e.code == 'wrong-password') {
         message = 'Contraseña incorrecta.';
       }
-
       _showErrorMessage(message);
     } catch (e) {
       _showErrorMessage('Error al iniciar sesión. Inténtalo de nuevo.');
@@ -63,6 +58,10 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.of(context).pushNamed('/register');
   }
 
+  void _navigateToForgotPassword() {
+    Navigator.of(context).pushNamed('/forgotPassword');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,10 +71,7 @@ class _LoginPageState extends State<LoginPage> {
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Colors.green.withOpacity(0.8),
-                  Colors.black.withOpacity(0.7),
-                ],
+                colors: [Colors.green.withOpacity(0.8), Colors.black.withOpacity(0.7)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -172,6 +168,18 @@ class _LoginPageState extends State<LoginPage> {
                             return null;
                           },
                         ),
+                        const SizedBox(height: 16),
+                        // Enlace para recuperar contraseña
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: _navigateToForgotPassword,
+                            child: Text(
+                              '¿Olvidaste tu contraseña?',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 32),
                         // Botón de inicio de sesión
                         _buildLoginButton(),
@@ -245,3 +253,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+

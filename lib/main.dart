@@ -24,6 +24,7 @@ import 'vista/uvr_screen.dart';
 import 'vista/vpn_screen.dart';
 import 'vista/bonos_screen.dart';
 import 'vista/inflacion_screen.dart';
+import 'vista/forgot_password_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
         '/userMenu': (context) => UserMenu(),
         '/register': (context) => RegisterPage(),
         '/login': (context) => LoginPage(),
+        '/forgotPassword': (context) => ForgotPasswordScreen(),
         '/simpleInterestAmount': (context) => SimpleInterestAmount(),
         '/simpleInterestRate': (context) => SimpleInterestRate(),
         '/simpleInterestTime': (context) => SimpleInterestTime(),
