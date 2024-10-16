@@ -10,7 +10,8 @@ class LoanStatusPage extends StatefulWidget {
   _LoanStatusPageState createState() => _LoanStatusPageState();
 }
 
-class _LoanStatusPageState extends State<LoanStatusPage> with SingleTickerProviderStateMixin {
+class _LoanStatusPageState extends State<LoanStatusPage>
+    with SingleTickerProviderStateMixin {
   final FirestoreService _firestoreService = FirestoreService();
   final TextEditingController _paymentController = TextEditingController();
   double _paymentAmount = 0.0;
@@ -115,13 +116,14 @@ class _LoanStatusPageState extends State<LoanStatusPage> with SingleTickerProvid
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade900,
+      backgroundColor: const Color.fromARGB(255, 35, 94, 35),
       body: SafeArea(
         child: FadeTransition(
           opacity: _animation,
@@ -133,14 +135,18 @@ class _LoanStatusPageState extends State<LoanStatusPage> with SingleTickerProvid
                   children: [
                     SizedBox(height: 80),
                     _buildLoanDropdown(), // Selector de préstamo
-                    _buildLoanInfoCard('Saldo Ficticio', _userBalance, Icons.account_balance_wallet),
+                    _buildLoanInfoCard('Saldo Ficticio', _userBalance,
+                        Icons.account_balance_wallet),
                     _selectedLoan != null
-                        ? _buildLoanInfoCard('Balance Pendiente', _selectedLoan!.balance, Icons.account_balance)
+                        ? _buildLoanInfoCard('Balance Pendiente',
+                            _selectedLoan!.balance, Icons.account_balance)
                         : Container(),
                     SizedBox(height: 20),
                     _buildPaymentField(),
                     SizedBox(height: 10),
-                    _selectedLoan != null ? _buildPaymentHistory(_selectedLoan!.id) : Container(),
+                    _selectedLoan != null
+                        ? _buildPaymentHistory(_selectedLoan!.id)
+                        : Container(),
                   ],
                 ),
               ),
@@ -225,7 +231,8 @@ class _LoanStatusPageState extends State<LoanStatusPage> with SingleTickerProvid
       child: ListTile(
         leading: Icon(icon, color: Colors.green, size: 30),
         title: Text(label, style: TextStyle(color: Colors.white, fontSize: 18)),
-        trailing: Text(displayValue, style: TextStyle(color: Colors.white, fontSize: 18)),
+        trailing: Text(displayValue,
+            style: TextStyle(color: Colors.white, fontSize: 18)),
       ),
     );
   }
@@ -262,7 +269,8 @@ class _LoanStatusPageState extends State<LoanStatusPage> with SingleTickerProvid
         }
 
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Text('No hay pagos registrados.', style: TextStyle(color: Colors.white));
+          return Text('No hay pagos registrados.',
+              style: TextStyle(color: Colors.white));
         }
 
         final payments = snapshot.data!.docs;
@@ -276,7 +284,8 @@ class _LoanStatusPageState extends State<LoanStatusPage> with SingleTickerProvid
 
             return ListTile(
               leading: Icon(Icons.payment, color: Colors.green),
-              title: Text('Pago de \$${amount.toStringAsFixed(2)}', style: TextStyle(color: Colors.white)),
+              title: Text('Pago de \$${amount.toStringAsFixed(2)}',
+                  style: TextStyle(color: Colors.white)),
               subtitle: Text(
                 'Fecha: ${date.day}/${date.month}/${date.year}',
                 style: TextStyle(color: Colors.white70),
@@ -288,4 +297,3 @@ class _LoanStatusPageState extends State<LoanStatusPage> with SingleTickerProvid
     );
   }
 }
-

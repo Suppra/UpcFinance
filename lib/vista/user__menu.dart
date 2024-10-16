@@ -235,14 +235,18 @@ class _UserMenuState extends State<UserMenu> {
               children: [
                 SizedBox(height: 20),
                 // Usar FutureBuilder para obtener el monto del préstamo
-                _buildDashboard(email),
+                _buildDepositField(), // Campo de depósito en la parte superior
+                SizedBox(height: 10),
+                _buildDepositButton(context), // Botón de depósito en la parte superior
+                SizedBox(height: 20),
+                _buildDashboard(email), // Dashboard con saldo
                 SizedBox(height: 20),
                 Text(
                   'Bienvenido a UPC Finance',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: const Color.fromARGB(255, 0, 0, 0),
                   ),
                 ),
                 SizedBox(height: 10),
@@ -252,13 +256,9 @@ class _UserMenuState extends State<UserMenu> {
                   style: TextStyle(
                     fontSize: 18,
                     height: 1.5,
-                    color: const Color.fromARGB(255, 255, 255, 255),
+                    color: const Color.fromARGB(255, 24, 18, 18),
                   ),
                 ),
-                SizedBox(height: 20),
-                _buildDepositField(), // Campo de depósito
-                SizedBox(height: 10),
-                _buildDepositButton(context), // Botón de depósito
               ],
             ),
           ),
@@ -344,12 +344,12 @@ class _UserMenuState extends State<UserMenu> {
       decoration: InputDecoration(
         labelText: 'Monto a Depositar',
         filled: true,
-        fillColor: Colors.white.withOpacity(0.15),
+        fillColor: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
-        labelStyle: TextStyle(color: Colors.white),
+        labelStyle: TextStyle(color: const Color.fromARGB(255, 12, 8, 8)),
       ),
       style: TextStyle(color: Colors.white),
       keyboardType: TextInputType.numberWithOptions(decimal: true),
@@ -410,13 +410,13 @@ class _UserMenuState extends State<UserMenu> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        padding: EdgeInsets.symmetric(vertical: 16),
+        padding: EdgeInsets.symmetric(vertical: 26),
       ),
       child: Text(
         'Depositar',
         style: TextStyle(
           fontSize: 18,
-          color: Colors.white,
+          color: const Color.fromARGB(255, 48, 41, 41),
         ),
       ),
     );
