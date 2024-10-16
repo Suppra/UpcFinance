@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
-  
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -11,7 +11,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
-  
+
   String email = '';
   String password = '';
   bool isLoading = false;
@@ -31,7 +31,6 @@ class _LoginPageState extends State<LoginPage> {
         password: password,
       );
 
-      // Navegar al menú de usuario
       Navigator.of(context).pushNamedAndRemoveUntil('/userMenu', (route) => false);
     } on FirebaseAuthException catch (e) {
       String message = 'Error al iniciar sesión';
@@ -41,19 +40,23 @@ class _LoginPageState extends State<LoginPage> {
         message = 'Contraseña incorrecta.';
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
+      _showErrorMessage(message);
     } catch (e) {
-      print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al iniciar sesión. Inténtalo de nuevo.')),
-      );
+      _showErrorMessage('Error al iniciar sesión. Inténtalo de nuevo.');
     } finally {
       setState(() {
         isLoading = false;
       });
     }
+  }
+
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+      ),
+    );
   }
 
   void _navigateToRegister() {
@@ -65,124 +68,179 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // Imagen de fondo
+          // Fondo con degradado e imagen semitransparente
           Container(
             decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/finances_background.png'), // Cambia por la ruta correcta de la imagen de fondo
+              gradient: LinearGradient(
+                colors: [
+                  Colors.green.withOpacity(0.8),
+                  Colors.black.withOpacity(0.7),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Opacity(
+              opacity: 0.2,
+              child: Image.asset(
+                'assets/images/finances_background.png',
                 fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
               ),
             ),
           ),
-          // Fondo de color semitransparente para mejorar la legibilidad
-          Container(
-            color: Colors.black.withOpacity(0.6),
-          ),
-          // Contenido principal
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: isLoading
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : SingleChildScrollView(
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Logo de la app
-                            Image.asset(
-                              'assets/images/fincalc_logo.png', // Cambia por la ruta correcta del logo
-                              height: 150,
-                              fit: BoxFit.contain,
-                            ),
-                            SizedBox(height: 40),
-                            // Campo de correo electrónico
-                            TextFormField(
-                              decoration: InputDecoration(
-                                labelText: 'Correo Electrónico',
-                                labelStyle: TextStyle(color: const Color.fromARGB(255, 255, 255, 255)),
-                                filled: true,
-                                fillColor: const Color.fromARGB(255, 32, 189, 79).withOpacity(0.8),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                  borderSide: BorderSide.none,
+          SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Logo redondeado con sombra
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.25),
+                                  spreadRadius: 5,
+                                  blurRadius: 15,
+                                  offset: Offset(0, 5),
                                 ),
-                              ),
-                              keyboardType: TextInputType.emailAddress,
-                              onSaved: (value) {
-                                email = value!.trim();
-                              },
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Ingresa tu correo electrónico';
-                                }
-                                if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                                  return 'Ingresa un correo electrónico válido';
-                                }
-                                return null;
-                              },
+                              ],
                             ),
-                            SizedBox(height: 36),
-                            // Campo de contraseña
-                            TextFormField(
-                              decoration: InputDecoration(
-                                labelText: 'Contraseña',
-                                labelStyle: TextStyle(color: const Color.fromARGB(255, 252, 253, 253)),
-                                filled: true,
-                                fillColor: const Color.fromARGB(255, 37, 184, 44).withOpacity(0.8),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                              obscureText: true,
-                              onSaved: (value) {
-                                password = value!;
-                              },
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Ingresa tu contraseña';
-                                }
-                                if (value.length < 6) {
-                                  return 'La contraseña debe tener al menos 6 caracteres';
-                                }
-                                return null;
-                              },
+                            child: Image.asset(
+                              'assets/images/fincalc_logo.png',
+                              height: 120,
                             ),
-                            SizedBox(height: 30),
-                            // Botón de inicio de sesión
-                            ElevatedButton(
-                                     onPressed: _login,
-                                     style: ElevatedButton.styleFrom(
-                                     backgroundColor: Colors.green, // Color del botón
-                                     padding: EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-                                     shape: RoundedRectangleBorder(
-                                     borderRadius: BorderRadius.circular(30),
-                                         ),
-                                            ),
-                                  child: Text(
-                                   'Iniciar Sesión',
-                                  style: TextStyle(fontSize: 18, color: Colors.white),
-                                   ),
-                                     ),
-
-                            SizedBox(height: 20),
-                            // Enlace para registrarse
-                            TextButton(
-                              onPressed: _navigateToRegister,
-                              child: Text(
-                                '¿No tienes una cuenta? Regístrate',
-                                style: TextStyle(color: Colors.greenAccent),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 40),
+                        // Título
+                        Text(
+                          'Bienvenido a UPC Finance',
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        // Subtítulo
+                        Text(
+                          'Inicia sesión para continuar',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white70,
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                        // Campo de correo electrónico
+                        _buildTextField(
+                          label: 'Correo Electrónico',
+                          icon: Icons.email,
+                          onSaved: (value) => email = value!.trim(),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Ingresa tu correo electrónico';
+                            }
+                            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                              return 'Ingresa un correo electrónico válido';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        // Campo de contraseña
+                        _buildTextField(
+                          label: 'Contraseña',
+                          icon: Icons.lock,
+                          obscureText: true,
+                          onSaved: (value) => password = value!,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Ingresa tu contraseña';
+                            }
+                            if (value.length < 6) {
+                              return 'La contraseña debe tener al menos 6 caracteres';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 32),
+                        // Botón de inicio de sesión
+                        _buildLoginButton(),
+                        const SizedBox(height: 16),
+                        // Enlace para registrarse
+                        TextButton(
+                          onPressed: _navigateToRegister,
+                          child: Text(
+                            '¿No tienes una cuenta? Regístrate',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required String label,
+    required IconData icon,
+    bool obscureText = false,
+    required Function(String?) onSaved,
+    required String? Function(String?) validator,
+  }) {
+    return TextFormField(
+      obscureText: obscureText,
+      onSaved: onSaved,
+      validator: validator,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: Colors.white),
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.white),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.1),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        floatingLabelStyle: TextStyle(color: Colors.white),
+      ),
+      style: TextStyle(color: Colors.white),
+    );
+  }
+
+  Widget _buildLoginButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : _login,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green.shade700,
+          padding: EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: isLoading
+            ? CircularProgressIndicator(color: Colors.white)
+            : Text(
+                'Iniciar Sesión',
+                style: TextStyle(fontSize: 18, color: Colors.white),
+              ),
       ),
     );
   }
