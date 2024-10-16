@@ -202,6 +202,48 @@ class _UserMenuState extends State<UserMenu> {
                 ),
               ],
             ),
+                ExpansionTile(
+              leading: Icon(Icons.add_chart, color: Colors.green),
+              title:
+                  Text('Extras', style: TextStyle(color: Colors.black)),
+              children: [
+                  ListTile(
+                  leading: Icon(Icons.trending_up, color: Colors.green),
+                  title: Text('Tasa Interna de Retorno (TIR)', style: TextStyle(color: Colors.black87)),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/tir');
+                  },
+               ),
+                ListTile(
+                  leading: Icon(Icons.account_balance, color: Colors.green),
+                  title: Text('Unidad de Valor Real (UVR)', style: TextStyle(color: Colors.black87)),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/uvr');
+                   },
+                ),
+                ListTile(
+                 leading: Icon(Icons.show_chart, color: Colors.green),
+                 title: Text('Evaluación de Alternativas (VPN)', style: TextStyle(color: Colors.black87)),
+                 onTap: () {
+                  Navigator.pushNamed(context, '/vpn');
+                   },
+                ),
+                ListTile(
+                 leading: Icon(Icons.money, color: Colors.green),
+                 title: Text('Bonos', style: TextStyle(color: Colors.black87)),
+                 onTap: () {
+                   Navigator.pushNamed(context, '/bonos');
+                   },
+                ),
+                ListTile(
+                 leading: Icon(Icons.trending_flat, color: Colors.green),
+                 title: Text('Inflación', style: TextStyle(color: Colors.black87)),
+                 onTap: () {
+                   Navigator.pushNamed(context, '/inflacion');
+                  },
+                ),
+                ],
+                ),
             Divider(),
             // Solicitar Préstamo
             ListTile(

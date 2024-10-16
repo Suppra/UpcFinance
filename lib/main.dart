@@ -19,6 +19,11 @@ import 'vista/amortization_american.dart';
 import 'vista/loan_request_page.dart';
 import 'vista/loan_status_page.dart';
 import 'vista/login_page.dart';
+import 'vista/tir_screen.dart';
+import 'vista/uvr_screen.dart';
+import 'vista/vpn_screen.dart';
+import 'vista/bonos_screen.dart';
+import 'vista/inflacion_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,6 +62,11 @@ class MyApp extends StatelessWidget {
         '/amortizationAmerican': (context) => AmortizationAmerican(),
         '/loanRequest': (context) => LoanRequestPage(),
         '/loanStatus': (context) => LoanStatusPage(),
+        '/tir': (context) => TIRScreen(),
+        '/uvr': (context) => UVRScreen(),
+        '/vpn': (context) => VPNScreen(),
+        '/bonos': (context) => BonosScreen(),
+        '/inflacion': (context) => InflacionScreen(),
       },
     );
   }
