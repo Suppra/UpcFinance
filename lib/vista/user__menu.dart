@@ -2,7 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class UserMenu extends StatelessWidget {
+class UserMenu extends StatefulWidget {
+  @override
+  _UserMenuState createState() => _UserMenuState();
+}
+
+class _UserMenuState extends State<UserMenu> {
+  final TextEditingController _depositController = TextEditingController();
+  double _balance = 0.0; // Variable para almacenar el saldo disponible
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserBalance(); // Cargar el saldo al iniciar
+  }
+
+  Future<void> _fetchUserBalance() async {
+    final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
+    DocumentSnapshot userBalanceSnapshot = await FirebaseFirestore.instance
+        .collection('user_balances')
+        .doc(userId)
+        .get();
+
+    if (userBalanceSnapshot.exists) {
+      setState(() {
+        _balance = userBalanceSnapshot.get('balance')?.toDouble() ?? 0.0;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Obtener el correo del usuario actual
@@ -13,7 +42,7 @@ class UserMenu extends StatelessWidget {
         title: Text(
           'Menú de Usuario - UPC Finance',
           style: TextStyle(
-            color: Colors.white, // Cambia este color al que desees
+            color: Colors.white,
           ),
         ),
         backgroundColor: Colors.green,
@@ -45,26 +74,22 @@ class UserMenu extends StatelessWidget {
             // Interés Simple
             ExpansionTile(
               leading: Icon(Icons.attach_money, color: Colors.green),
-              title:
-                  Text('Interés Simple', style: TextStyle(color: Colors.black)),
+              title: Text('Interés Simple', style: TextStyle(color: Colors.black)),
               children: [
                 ListTile(
-                  title: Text('Monto Futuro',
-                      style: TextStyle(color: Colors.black87)),
+                  title: Text('Monto Futuro', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/simpleInterestAmount');
                   },
                 ),
                 ListTile(
-                  title: Text('Tasa de Interés',
-                      style: TextStyle(color: Colors.black87)),
+                  title: Text('Tasa de Interés', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/simpleInterestRate');
                   },
                 ),
                 ListTile(
-                  title:
-                      Text('Tiempo', style: TextStyle(color: Colors.black87)),
+                  title: Text('Tiempo', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/simpleInterestTime');
                   },
@@ -74,26 +99,22 @@ class UserMenu extends StatelessWidget {
             // Interés Compuesto
             ExpansionTile(
               leading: Icon(Icons.calculate, color: Colors.green),
-              title: Text('Interés Compuesto',
-                  style: TextStyle(color: Colors.black)),
+              title: Text('Interés Compuesto', style: TextStyle(color: Colors.black)),
               children: [
                 ListTile(
-                  title: Text('Monto Futuro',
-                      style: TextStyle(color: Colors.black87)),
+                  title: Text('Monto Futuro', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/compoundInterestAmount');
                   },
                 ),
                 ListTile(
-                  title: Text('Tasa de Interés',
-                      style: TextStyle(color: Colors.black87)),
+                  title: Text('Tasa de Interés', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/compoundInterestRate');
                   },
                 ),
                 ListTile(
-                  title:
-                      Text('Tiempo', style: TextStyle(color: Colors.black87)),
+                  title: Text('Tiempo', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/compoundInterestTime');
                   },
@@ -103,19 +124,16 @@ class UserMenu extends StatelessWidget {
             // Gradiente Aritmético
             ExpansionTile(
               leading: Icon(Icons.trending_up, color: Colors.green),
-              title: Text('Gradiente Aritmético',
-                  style: TextStyle(color: Colors.black)),
+              title: Text('Gradiente Aritmético', style: TextStyle(color: Colors.black)),
               children: [
                 ListTile(
-                  title: Text('Valor Presente/Futuro',
-                      style: TextStyle(color: Colors.black87)),
+                  title: Text('Valor Presente/Futuro', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/arithmeticGradientValue');
                   },
                 ),
                 ListTile(
-                  title: Text('Valor de la Serie',
-                      style: TextStyle(color: Colors.black87)),
+                  title: Text('Valor de la Serie', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/arithmeticGradientSeries');
                   },
@@ -125,19 +143,16 @@ class UserMenu extends StatelessWidget {
             // Gradiente Geométrico
             ExpansionTile(
               leading: Icon(Icons.trending_down, color: Colors.green),
-              title: Text('Gradiente Geométrico',
-                  style: TextStyle(color: Colors.black)),
+              title: Text('Gradiente Geométrico', style: TextStyle(color: Colors.black)),
               children: [
                 ListTile(
-                  title: Text('Valor Presente/Futuro',
-                      style: TextStyle(color: Colors.black87)),
+                  title: Text('Valor Presente/Futuro', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/geometricGradientValue');
                   },
                 ),
                 ListTile(
-                  title: Text('Valor de la Serie',
-                      style: TextStyle(color: Colors.black87)),
+                  title: Text('Valor de la Serie', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/geometricGradientSeries');
                   },
@@ -147,26 +162,22 @@ class UserMenu extends StatelessWidget {
             // Amortización
             ExpansionTile(
               leading: Icon(Icons.table_chart, color: Colors.green),
-              title:
-                  Text('Amortización', style: TextStyle(color: Colors.black)),
+              title: Text('Amortización', style: TextStyle(color: Colors.black)),
               children: [
                 ListTile(
-                  title: Text('Método Alemán',
-                      style: TextStyle(color: Colors.black87)),
+                  title: Text('Método Alemán', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/amortizationGerman');
                   },
                 ),
                 ListTile(
-                  title: Text('Método Francés',
-                      style: TextStyle(color: Colors.black87)),
+                  title: Text('Método Francés', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/amortizationFrench');
                   },
                 ),
                 ListTile(
-                  title: Text('Método Americano',
-                      style: TextStyle(color: Colors.black87)),
+                  title: Text('Método Americano', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/amortizationAmerican');
                   },
@@ -177,8 +188,7 @@ class UserMenu extends StatelessWidget {
             // Solicitar Préstamo
             ListTile(
               leading: Icon(Icons.monetization_on, color: Colors.green),
-              title: Text('Solicitar Préstamo',
-                  style: TextStyle(color: Colors.black87)),
+              title: Text('Solicitar Préstamo', style: TextStyle(color: Colors.black87)),
               onTap: () {
                 Navigator.pushNamed(context, '/loanRequest');
               },
@@ -186,8 +196,7 @@ class UserMenu extends StatelessWidget {
             // Ver Estado del Préstamo
             ListTile(
               leading: Icon(Icons.account_balance_wallet, color: Colors.green),
-              title: Text('Ver Estado del Préstamo',
-                  style: TextStyle(color: Colors.black87)),
+              title: Text('Ver Estado del Préstamo', style: TextStyle(color: Colors.black87)),
               onTap: () {
                 Navigator.pushNamed(context, '/loanStatus');
               },
@@ -195,19 +204,14 @@ class UserMenu extends StatelessWidget {
             // Cerrar Sesión
             ListTile(
               leading: Icon(Icons.logout, color: Colors.redAccent),
-              title: Text('Cerrar Sesión',
-                  style: TextStyle(color: Colors.black87)),
+              title: Text('Cerrar Sesión', style: TextStyle(color: Colors.black87)),
               onTap: () async {
                 try {
                   await FirebaseAuth.instance.signOut();
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                      '/login', (Route<dynamic> route) => false);
+                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content:
-                          Text('Error al cerrar sesión. Inténtalo de nuevo.'),
-                    ),
+                    SnackBar(content: Text('Error al cerrar sesión. Inténtalo de nuevo.')),
                   );
                 }
               },
@@ -251,6 +255,10 @@ class UserMenu extends StatelessWidget {
                     color: const Color.fromARGB(255, 255, 255, 255),
                   ),
                 ),
+                SizedBox(height: 20),
+                _buildDepositField(), // Campo de depósito
+                SizedBox(height: 10),
+                _buildDepositButton(context), // Botón de depósito
               ],
             ),
           ),
@@ -263,35 +271,33 @@ class UserMenu extends StatelessWidget {
     // Obtener el UID del usuario actual
     final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-    return FutureBuilder<QuerySnapshot>(
+    return FutureBuilder<DocumentSnapshot>(
       future: FirebaseFirestore.instance
-          .collection('loans')
-          .where('userId', isEqualTo: userId)
+          .collection('user_balances')
+          .doc(userId)
           .get(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Muestra un cargador mientras se obtiene el monto
+          return CircularProgressIndicator(); // Muestra un cargador mientras se obtiene el saldo
         }
 
         if (snapshot.hasError) {
-          return Text('Error al cargar el monto');
+          return Text('Error al cargar el saldo'); // Manejo de errores
         }
 
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Text(
-              'Monto no disponible'); // Manejar caso cuando no hay documentos
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return Text('Saldo no disponible'); // Manejo si no hay datos
         }
 
-        // Obtener el monto desde Firestore (asumiendo que quieres el primero)
-        final double amount =
-            snapshot.data!.docs.first['amount']?.toDouble() ?? 0.0;
+        // Obtener el saldo ficticio del campo 'balance'
+        double balance = snapshot.data?.get('balance')?.toDouble() ?? 0.0;
 
         return Card(
           elevation: 10,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
-          color: const Color.fromARGB(255, 32, 151, 72).withOpacity(0.9),
+          color: Colors.green.withOpacity(0.9),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -307,22 +313,21 @@ class UserMenu extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: const Color.fromARGB(255, 255, 255, 255),
+                    color: Colors.white,
                   ),
                 ),
                 SizedBox(height: 5),
                 Text(
                   'Correo: $email',
-                  style: TextStyle(
-                      color: const Color.fromARGB(255, 252, 252, 252)),
+                  style: TextStyle(color: Colors.white70),
                 ),
                 SizedBox(height: 10),
                 Text(
-                  'Saldo Disponible: \$${amount.toStringAsFixed(2)}',
+                  'Saldo Disponible: \$${balance.toStringAsFixed(2)}',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: const Color.fromARGB(255, 255, 255, 255),
+                    color: Colors.white,
                   ),
                 ),
               ],
@@ -332,4 +337,89 @@ class UserMenu extends StatelessWidget {
       },
     );
   }
+
+  Widget _buildDepositField() {
+    return TextField(
+      controller: _depositController,
+      decoration: InputDecoration(
+        labelText: 'Monto a Depositar',
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.15),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        labelStyle: TextStyle(color: Colors.white),
+      ),
+      style: TextStyle(color: Colors.white),
+      keyboardType: TextInputType.numberWithOptions(decimal: true),
+    );
+  }
+
+  Widget _buildDepositButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () async {
+        final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+        double depositAmount = double.tryParse(_depositController.text) ?? 0.0;
+
+        if (depositAmount <= 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Ingresa un monto válido para el depósito.')),
+          );
+          return;
+        }
+
+        try {
+          DocumentSnapshot userBalanceSnapshot = await FirebaseFirestore.instance
+              .collection('user_balances')
+              .doc(userId)
+              .get();
+
+          if (userBalanceSnapshot.exists) {
+            double currentBalance = userBalanceSnapshot.get('balance')?.toDouble() ?? 0.0;
+            double newBalance = currentBalance + depositAmount;
+
+            await FirebaseFirestore.instance
+                .collection('user_balances')
+                .doc(userId)
+                .update({'balance': newBalance});
+
+            // Actualizar el saldo en la vista
+            setState(() {
+              _balance = newBalance;
+            });
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Depósito realizado con éxito.')),
+            );
+
+            _depositController.clear(); // Limpiar el campo después del depósito
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: El balance no existe.')),
+            );
+          }
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error al realizar el depósito. Inténtalo de nuevo.')),
+          );
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.green,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: EdgeInsets.symmetric(vertical: 16),
+      ),
+      child: Text(
+        'Depositar',
+        style: TextStyle(
+          fontSize: 18,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
 }
+
