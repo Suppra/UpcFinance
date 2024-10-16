@@ -1,4 +1,4 @@
-import 'dart:math'; // Importa dart:math para poder usar .pow()
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/firestore_service.dart';
@@ -16,9 +16,9 @@ class _LoanRequestPageState extends State<LoanRequestPage> {
   double loanAmount = 0.0;
   int loanTerm = 0;
   double interestRate = 0.0;
-  String loanType = 'Interés Simple'; // Valor por defecto
+  String loanType = 'Interés Simple';
+  bool isLoading = false; // Controla si la solicitud está en proceso
 
-  // Lista de opciones para el tipo de interés/amortización
   final List<String> loanTypes = [
     'Interés Simple',
     'Interés Compuesto',
@@ -29,182 +29,232 @@ class _LoanRequestPageState extends State<LoanRequestPage> {
     'Amortización Americana',
   ];
 
-  // Método para solicitar un préstamo
   Future<void> _requestLoan() async {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Usuario no autenticado.')),
-        );
-        return;
-      }
+    if (!_formKey.currentState!.validate()) return;
 
-      // Realizar el cálculo según el tipo de préstamo seleccionado
+    _formKey.currentState!.save();
+    setState(() {
+      isLoading = true; // Mostrar indicador de carga
+    });
+
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      _showMessage('Usuario no autenticado.');
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    try {
       double calculatedAmount = _calculateLoanAmount();
-
       Loan newLoan = Loan(
-        id: '', // Se asignará automáticamente por Firestore
+        id: '',
         userId: user.uid,
-        amount: calculatedAmount, // Monto calculado
+        amount: calculatedAmount,
         term: loanTerm,
         interestRate: interestRate,
         requestDate: DateTime.now(),
-        balance: calculatedAmount, // Balance inicial igual al monto calculado
-        loanType: loanType, // Tipo de préstamo seleccionado
+        balance: calculatedAmount,
+        loanType: loanType,
       );
 
-      try {
-        // Solicitar el préstamo a través del servicio
-        await _firestoreService.requestLoan(newLoan);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Préstamo solicitado con éxito.')),
-        );
-
-        Navigator.pop(context); // Regresar a la página anterior
-      } catch (e) {
-        print('Error al solicitar el préstamo: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al solicitar el préstamo. Inténtalo de nuevo.')),
-        );
-      }
+      await _firestoreService.requestLoan(newLoan);
+      _showMessage('Préstamo solicitado con éxito.');
+      Navigator.pop(context);
+    } catch (e) {
+      _showMessage('Error al solicitar el préstamo. Inténtalo de nuevo.');
+    } finally {
+      setState(() {
+        isLoading = false; // Ocultar indicador de carga
+      });
     }
   }
 
-  // Método para calcular el monto del préstamo según el tipo seleccionado
   double _calculateLoanAmount() {
-    double calculatedAmount = loanAmount;
-
     switch (loanType) {
       case 'Interés Simple':
-        calculatedAmount = loanAmount * (1 + (interestRate / 100) * loanTerm);
-        break;
+        return loanAmount * (1 + (interestRate / 100) * loanTerm);
       case 'Interés Compuesto':
-        // Usamos dart:math para calcular la potencia
-        calculatedAmount = loanAmount * pow(1 + (interestRate / 100), loanTerm);
-        break;
-      case 'Gradiente Aritmético':
-        // Lógica para calcular con Gradiente Aritmético
-        break;
-      case 'Gradiente Geométrico':
-        // Lógica para calcular con Gradiente Geométrico
-        break;
-      case 'Amortización Alemana':
-        // Lógica para Amortización Alemana
-        break;
-      case 'Amortización Francesa':
-        // Lógica para Amortización Francesa
-        break;
-      case 'Amortización Americana':
-        // Lógica para Amortización Americana
-        break;
+        return loanAmount * pow(1 + (interestRate / 100), loanTerm);
+      default:
+        return loanAmount;
     }
+  }
 
-    return calculatedAmount;
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Solicitar Préstamo'),
-        backgroundColor: Colors.green,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              // Monto del préstamo
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Monto del Préstamo'),
-                keyboardType: TextInputType.number,
-                onSaved: (value) {
-                  loanAmount = double.parse(value!);
-                },
-                validator: (value) {
-                  if (value!.isEmpty || double.parse(value) <= 0) {
-                    return 'Ingresa un monto válido';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              // Plazo en meses
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Plazo en meses'),
-                keyboardType: TextInputType.number,
-                onSaved: (value) {
-                  loanTerm = int.parse(value!);
-                },
-                validator: (value) {
-                  if (value!.isEmpty || int.parse(value) <= 0) {
-                    return 'Ingresa un plazo válido';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              // Tasa de interés
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Tasa de Interés (%)'),
-                keyboardType: TextInputType.number,
-                onSaved: (value) {
-                  interestRate = double.parse(value!);
-                },
-                validator: (value) {
-                  if (value!.isEmpty || double.parse(value) < 0) {
-                    return 'Ingresa una tasa de interés válida';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              // Tipo de préstamo
-              DropdownButtonFormField<String>(
-                value: loanType.isNotEmpty ? loanType : null, // Corregir el valor inicial
-                items: loanTypes.map((type) {
-                  return DropdownMenuItem<String>(
-                    value: type,
-                    child: Text(type),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    loanType = value ?? 'Interés Simple'; // Asegurarse de que no sea nulo
-                  });
-                },
-                decoration: InputDecoration(labelText: 'Tipo de Préstamo'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Selecciona un tipo de préstamo';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 30),
-              // Botón para solicitar el préstamo
-              ElevatedButton(
-                onPressed: _requestLoan,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green, // Color del botón
-                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: Text(
-                  'Solicitar Préstamo',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/finances_background.png'),
+                fit: BoxFit.cover,
+                colorFilter: ColorFilter.mode(
+                  Colors.green.withOpacity(0.6),
+                  BlendMode.darken,
                 ),
               ),
-            ],
+            ),
           ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildBackButton(),
+                    SizedBox(height: 20),
+                    Text(
+                      'Solicitar Préstamo',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 30),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          _buildTextField(
+                            label: 'Monto del Préstamo',
+                            icon: Icons.monetization_on,
+                            onSaved: (value) => loanAmount = double.parse(value!),
+                          ),
+                          SizedBox(height: 16),
+                          _buildTextField(
+                            label: 'Plazo en meses',
+                            icon: Icons.calendar_today,
+                            onSaved: (value) => loanTerm = int.parse(value!),
+                          ),
+                          SizedBox(height: 16),
+                          _buildTextField(
+                            label: 'Tasa de Interés (%)',
+                            icon: Icons.percent,
+                            onSaved: (value) => interestRate = double.parse(value!),
+                          ),
+                          SizedBox(height: 16),
+                          DropdownButtonFormField<String>(
+                            value: loanType,
+                            items: loanTypes.map((type) {
+                              return DropdownMenuItem(
+                                value: type,
+                                child: Text(type),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                loanType = value!;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              labelText: 'Tipo de Préstamo',
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(0.15),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              floatingLabelStyle: TextStyle(color: Colors.white),
+                            ),
+                            style: TextStyle(color: Colors.white),
+                            dropdownColor: Colors.green.shade800,
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 30),
+                    isLoading
+                        ? Center(child: CircularProgressIndicator()) // Indicador de carga
+                        : ElevatedButton(
+                            onPressed: _requestLoan,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: Text(
+                              'Solicitar Préstamo',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.green.shade700,
+                              ),
+                            ),
+                          ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBackButton() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: GestureDetector(
+        onTap: () => Navigator.pop(context),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 22),
+            SizedBox(width: 8),
+            Text(
+              'Volver',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+
+  Widget _buildTextField({
+    required String label,
+    required IconData icon,
+    required Function(String?) onSaved,
+  }) {
+    return TextFormField(
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: Colors.white),
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.white),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.15),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      style: TextStyle(color: Colors.white),
+      keyboardType: TextInputType.number,
+      onSaved: onSaved,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Este campo es obligatorio';
+        }
+        return null;
+      },
+    );
+  }
 }
+

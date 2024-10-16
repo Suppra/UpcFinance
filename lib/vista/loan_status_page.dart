@@ -10,260 +10,282 @@ class LoanStatusPage extends StatefulWidget {
   _LoanStatusPageState createState() => _LoanStatusPageState();
 }
 
-class _LoanStatusPageState extends State<LoanStatusPage> {
+class _LoanStatusPageState extends State<LoanStatusPage> with SingleTickerProviderStateMixin {
   final FirestoreService _firestoreService = FirestoreService();
-  final TextEditingController _paymentController = TextEditingController(); // Controlador para el campo de pago
-  double _paymentAmount = 0.0; // Monto del pago ingresado por el usuario
+  final TextEditingController _paymentController = TextEditingController();
+  double _paymentAmount = 0.0;
+  double _userBalance = 0.0;
+  Loan? _selectedLoan; // Préstamo seleccionado
+  List<Loan> _loans = []; // Lista de préstamos del usuario
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _controller.forward();
+    _fetchUserBalance();
+    _fetchLoans(); // Cargar préstamos activos del usuario
+  }
 
   @override
   void dispose() {
-    _paymentController.dispose(); // Liberar el controlador al cerrar la página
+    _controller.dispose();
+    _paymentController.dispose();
     super.dispose();
   }
 
-  // Método para obtener el préstamo activo del usuario
-  Future<Loan?> _getActiveLoan() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) return null;
+  Future<void> _fetchUserBalance() async {
+    UserBalance? userBalance = await _firestoreService.getUserBalance();
+    setState(() {
+      _userBalance = userBalance?.balance ?? 0.0;
+    });
+  }
 
-    // Suponiendo que el usuario solo tiene un préstamo activo
+  Future<void> _fetchLoans() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('loans')
         .where('userId', isEqualTo: user.uid)
-        .limit(1)
         .get();
 
-    if (snapshot.docs.isNotEmpty) {
-      return Loan.fromDocument(snapshot.docs.first);
-    }
-    return null;
+    setState(() {
+      _loans = snapshot.docs.map((doc) => Loan.fromDocument(doc)).toList();
+      if (_loans.isNotEmpty) {
+        _selectedLoan = _loans.first;
+      }
+    });
   }
 
-  // Método para realizar un pago y actualizar el balance
-  Future<void> _makePayment(String loanId, double currentBalance) async {
-    // Obtener el valor del campo al realizar el pago
+  Future<void> _makePayment() async {
+    if (_selectedLoan == null) return;
+
     _paymentAmount = double.tryParse(_paymentController.text) ?? 0.0;
 
     if (_paymentAmount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ingresa un monto válido para el pago.')),
-      );
+      _showMessage('Ingresa un monto válido para el pago.');
       return;
     }
 
-    double newBalance = currentBalance - _paymentAmount;
+    if (_paymentAmount > _userBalance) {
+      _showMessage('Saldo insuficiente.');
+      return;
+    }
+
+    double newBalance = _selectedLoan!.balance - _paymentAmount;
+    double newUserBalance = _userBalance - _paymentAmount;
+
     if (newBalance < 0) newBalance = 0;
 
     try {
-      // Actualizar el balance del préstamo
-      await FirebaseFirestore.instance.collection('loans').doc(loanId).update({
-        'balance': newBalance,
-      });
-
-      // Registrar el pago en la subcolección 'payments'
       await FirebaseFirestore.instance
           .collection('loans')
-          .doc(loanId)
+          .doc(_selectedLoan!.id)
+          .update({'balance': newBalance});
+
+      await FirebaseFirestore.instance
+          .collection('loans')
+          .doc(_selectedLoan!.id)
           .collection('payments')
           .add({
         'amount': _paymentAmount,
         'date': Timestamp.now(),
       });
 
-      // Actualizar el saldo ficticio del usuario
-      UserBalance? userBalance = await _firestoreService.getUserBalance();
-      if (userBalance != null) {
-        double updatedBalance = userBalance.balance - _paymentAmount;
-        if (updatedBalance < 0) updatedBalance = 0;
-        await _firestoreService.updateUserBalance(updatedBalance);
-      }
+      await _firestoreService.updateUserBalance(newUserBalance);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Pago realizado con éxito.')),
-      );
+      _showMessage('Pago realizado con éxito.');
 
       setState(() {
-        _paymentController.clear(); // Limpiar el campo de pago después de realizar el pago
+        _userBalance = newUserBalance;
+        _selectedLoan!.balance = newBalance;
+        _paymentController.clear();
       });
     } catch (e) {
-      // Manejo de errores
       print('Error al realizar el pago: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al realizar el pago. Inténtalo de nuevo.')),
-      );
+      _showMessage('Error al realizar el pago. Inténtalo de nuevo.');
     }
   }
 
-  // Método para consultar el saldo ficticio
-  Future<UserBalance?> _getUserBalance() async {
-    return await _firestoreService.getUserBalance();
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Seguimiento de Préstamo'),
-        backgroundColor: Colors.green,
+      backgroundColor: Colors.grey.shade900,
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: _animation,
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView(
+                  children: [
+                    SizedBox(height: 80),
+                    _buildLoanDropdown(), // Selector de préstamo
+                    _buildLoanInfoCard('Saldo Ficticio', _userBalance, Icons.account_balance_wallet),
+                    _selectedLoan != null
+                        ? _buildLoanInfoCard('Balance Pendiente', _selectedLoan!.balance, Icons.account_balance)
+                        : Container(),
+                    SizedBox(height: 20),
+                    _buildPaymentField(),
+                    SizedBox(height: 10),
+                    _selectedLoan != null ? _buildPaymentHistory(_selectedLoan!.id) : Container(),
+                  ],
+                ),
+              ),
+              _buildBackButton(context),
+            ],
+          ),
+        ),
       ),
-      body: FutureBuilder<Loan?>(
-        future: _getActiveLoan(),
-        builder: (context, loanSnapshot) {
-          if (loanSnapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          Loan? loan = loanSnapshot.data;
-          if (loan == null) {
-            return Center(
-              child: Text('No tienes un préstamo activo en este momento.'),
-            );
-          }
-
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                // Información del préstamo
-                Text(
-                  'Monto del préstamo: \$${loan.amount.toStringAsFixed(2)}',
-                  style: TextStyle(fontSize: 18),
-                ),
-                Text(
-                  'Tasa de interés: ${loan.interestRate.toStringAsFixed(2)}%',
-                  style: TextStyle(fontSize: 18),
-                ),
-                Text(
-                  'Plazo: ${loan.term} meses',
-                  style: TextStyle(fontSize: 18),
-                ),
-                SizedBox(height: 20),
-
-                // Mostrar el saldo ficticio
-                FutureBuilder<UserBalance?>(
-                  future: _getUserBalance(),
-                  builder: (context, balanceSnapshot) {
-                    if (balanceSnapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
-                    }
-
-                    if (balanceSnapshot.hasError) {
-                      return Text(
-                        'Error al cargar el saldo ficticio.',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
-                      );
-                    }
-
-                    if (!balanceSnapshot.hasData || balanceSnapshot.data == null) {
-                      return Text(
-                        'Saldo Ficticio: \$0.00',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      );
-                    }
-
-                    double userBalance = balanceSnapshot.data!.balance;
-                    return Text(
-                      'Saldo Ficticio: \$${userBalance.toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    );
-                  },
-                ),
-                SizedBox(height: 20),
-
-                // Saldo pendiente del préstamo
-                Text(
-                  'Balance pendiente: \$${loan.balance.toStringAsFixed(2)}',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 30),
-
-                // Campo para ingresar el monto del pago
-                TextField(
-                  controller: _paymentController, // Utiliza el controlador para manejar el texto
-                  decoration: InputDecoration(
-                    labelText: 'Monto del Pago',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                ),
-
-                SizedBox(height: 20),
-
-                // Botón para realizar el pago
-                ElevatedButton(
-                  onPressed: () {
-                    _makePayment(loan.id, loan.balance);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green, // Color del botón
-                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: Text(
-                    'Realizar Pago',
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ),
-                SizedBox(height: 30),
-
-                // Historial de Pagos
-                Text(
-                  'Historial de Pagos:',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('loans')
-                        .doc(loan.id)
-                        .collection('payments')
-                        .orderBy('date', descending: true)
-                        .snapshots(),
-                    builder: (context, paymentSnapshot) {
-                      if (paymentSnapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-
-                      if (paymentSnapshot.hasError) {
-                        return Center(
-                          child: Text('Error al cargar los pagos.'),
-                        );
-                      }
-
-                      if (!paymentSnapshot.hasData || paymentSnapshot.data!.docs.isEmpty) {
-                        return Center(
-                          child: Text('No hay pagos realizados aún.'),
-                        );
-                      }
-
-                      final payments = paymentSnapshot.data!.docs;
-
-                      return ListView.builder(
-                        itemCount: payments.length,
-                        itemBuilder: (context, index) {
-                          var payment = payments[index];
-                          double amount = payment['amount'];
-                          Timestamp timestamp = payment['date'];
-                          DateTime date = timestamp.toDate();
-
-                          return ListTile(
-                            leading: Icon(Icons.payment, color: Colors.green),
-                            title: Text('Pago de \$${amount.toStringAsFixed(2)}'),
-                            subtitle: Text('Fecha: ${date.day}/${date.month}/${date.year}'),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-
-              ],
-            ),
-          );
-        },
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _makePayment,
+        backgroundColor: Colors.green,
+        icon: Icon(Icons.payment),
+        label: Text('Realizar Pago'),
       ),
     );
   }
+
+  Widget _buildLoanDropdown() {
+    return DropdownButtonFormField<Loan>(
+      value: _selectedLoan,
+      items: _loans.map((loan) {
+        return DropdownMenuItem(
+          value: loan,
+          child: Text(
+            'Préstamo: \$${loan.amount.toStringAsFixed(2)} - Balance: \$${loan.balance.toStringAsFixed(2)}',
+            style: TextStyle(color: Colors.white),
+          ),
+        );
+      }).toList(),
+      onChanged: (Loan? newLoan) {
+        setState(() {
+          _selectedLoan = newLoan;
+        });
+      },
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.1),
+        labelText: 'Selecciona un Préstamo',
+        labelStyle: TextStyle(color: Colors.white),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      dropdownColor: Colors.grey.shade800,
+    );
+  }
+
+  Widget _buildBackButton(BuildContext context) {
+    return Positioned(
+      top: 20,
+      left: 16,
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).pushNamed('/userMenu'),
+        child: Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Colors.white,
+            size: 28,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoanInfoCard(String label, num value, IconData icon,
+      {bool isPercentage = false, bool isMonths = false}) {
+    String displayValue = isPercentage
+        ? '${value.toStringAsFixed(2)}%'
+        : isMonths
+            ? '$value meses'
+            : '\$${value.toStringAsFixed(2)}';
+
+    return Card(
+      color: Colors.grey.shade800,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: Icon(icon, color: Colors.green, size: 30),
+        title: Text(label, style: TextStyle(color: Colors.white, fontSize: 18)),
+        trailing: Text(displayValue, style: TextStyle(color: Colors.white, fontSize: 18)),
+      ),
+    );
+  }
+
+  Widget _buildPaymentField() {
+    return TextField(
+      controller: _paymentController,
+      decoration: InputDecoration(
+        labelText: 'Monto del Pago',
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.1),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        labelStyle: TextStyle(color: Colors.white),
+      ),
+      style: TextStyle(color: Colors.white),
+      keyboardType: TextInputType.numberWithOptions(decimal: true),
+    );
+  }
+
+  Widget _buildPaymentHistory(String loanId) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('loans')
+          .doc(loanId)
+          .collection('payments')
+          .orderBy('date', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Text('No hay pagos registrados.', style: TextStyle(color: Colors.white));
+        }
+
+        final payments = snapshot.data!.docs;
+        return ListView.builder(
+          shrinkWrap: true,
+          itemCount: payments.length,
+          itemBuilder: (context, index) {
+            var payment = payments[index];
+            double amount = payment['amount'];
+            DateTime date = (payment['date'] as Timestamp).toDate();
+
+            return ListTile(
+              leading: Icon(Icons.payment, color: Colors.green),
+              title: Text('Pago de \$${amount.toStringAsFixed(2)}', style: TextStyle(color: Colors.white)),
+              subtitle: Text(
+                'Fecha: ${date.day}/${date.month}/${date.year}',
+                style: TextStyle(color: Colors.white70),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 }
+
