@@ -74,22 +74,26 @@ class _UserMenuState extends State<UserMenu> {
             // Interés Simple
             ExpansionTile(
               leading: Icon(Icons.attach_money, color: Colors.green),
-              title: Text('Interés Simple', style: TextStyle(color: Colors.black)),
+              title:
+                  Text('Interés Simple', style: TextStyle(color: Colors.black)),
               children: [
                 ListTile(
-                  title: Text('Monto Futuro', style: TextStyle(color: Colors.black87)),
+                  title: Text('Monto Futuro',
+                      style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/simpleInterestAmount');
                   },
                 ),
                 ListTile(
-                  title: Text('Tasa de Interés', style: TextStyle(color: Colors.black87)),
+                  title: Text('Tasa de Interés',
+                      style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/simpleInterestRate');
                   },
                 ),
                 ListTile(
-                  title: Text('Tiempo', style: TextStyle(color: Colors.black87)),
+                  title:
+                      Text('Tiempo', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/simpleInterestTime');
                   },
@@ -99,22 +103,26 @@ class _UserMenuState extends State<UserMenu> {
             // Interés Compuesto
             ExpansionTile(
               leading: Icon(Icons.calculate, color: Colors.green),
-              title: Text('Interés Compuesto', style: TextStyle(color: Colors.black)),
+              title: Text('Interés Compuesto',
+                  style: TextStyle(color: Colors.black)),
               children: [
                 ListTile(
-                  title: Text('Monto Futuro', style: TextStyle(color: Colors.black87)),
+                  title: Text('Monto Futuro',
+                      style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/compoundInterestAmount');
                   },
                 ),
                 ListTile(
-                  title: Text('Tasa de Interés', style: TextStyle(color: Colors.black87)),
+                  title: Text('Tasa de Interés',
+                      style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/compoundInterestRate');
                   },
                 ),
                 ListTile(
-                  title: Text('Tiempo', style: TextStyle(color: Colors.black87)),
+                  title:
+                      Text('Tiempo', style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/compoundInterestTime');
                   },
@@ -124,16 +132,19 @@ class _UserMenuState extends State<UserMenu> {
             // Gradiente Aritmético
             ExpansionTile(
               leading: Icon(Icons.trending_up, color: Colors.green),
-              title: Text('Gradiente Aritmético', style: TextStyle(color: Colors.black)),
+              title: Text('Gradiente Aritmético',
+                  style: TextStyle(color: Colors.black)),
               children: [
                 ListTile(
-                  title: Text('Valor Presente/Futuro', style: TextStyle(color: Colors.black87)),
+                  title: Text('Valor Presente/Futuro',
+                      style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/arithmeticGradientValue');
                   },
                 ),
                 ListTile(
-                  title: Text('Valor de la Serie', style: TextStyle(color: Colors.black87)),
+                  title: Text('Valor de la Serie',
+                      style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/arithmeticGradientSeries');
                   },
@@ -143,16 +154,19 @@ class _UserMenuState extends State<UserMenu> {
             // Gradiente Geométrico
             ExpansionTile(
               leading: Icon(Icons.trending_down, color: Colors.green),
-              title: Text('Gradiente Geométrico', style: TextStyle(color: Colors.black)),
+              title: Text('Gradiente Geométrico',
+                  style: TextStyle(color: Colors.black)),
               children: [
                 ListTile(
-                  title: Text('Valor Presente/Futuro', style: TextStyle(color: Colors.black87)),
+                  title: Text('Valor Presente/Futuro',
+                      style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/geometricGradientValue');
                   },
                 ),
                 ListTile(
-                  title: Text('Valor de la Serie', style: TextStyle(color: Colors.black87)),
+                  title: Text('Valor de la Serie',
+                      style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/geometricGradientSeries');
                   },
@@ -162,22 +176,26 @@ class _UserMenuState extends State<UserMenu> {
             // Amortización
             ExpansionTile(
               leading: Icon(Icons.table_chart, color: Colors.green),
-              title: Text('Amortización', style: TextStyle(color: Colors.black)),
+              title:
+                  Text('Amortización', style: TextStyle(color: Colors.black)),
               children: [
                 ListTile(
-                  title: Text('Método Alemán', style: TextStyle(color: Colors.black87)),
+                  title: Text('Método Alemán',
+                      style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/amortizationGerman');
                   },
                 ),
                 ListTile(
-                  title: Text('Método Francés', style: TextStyle(color: Colors.black87)),
+                  title: Text('Método Francés',
+                      style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/amortizationFrench');
                   },
                 ),
                 ListTile(
-                  title: Text('Método Americano', style: TextStyle(color: Colors.black87)),
+                  title: Text('Método Americano',
+                      style: TextStyle(color: Colors.black87)),
                   onTap: () {
                     Navigator.pushNamed(context, '/amortizationAmerican');
                   },
@@ -188,7 +206,8 @@ class _UserMenuState extends State<UserMenu> {
             // Solicitar Préstamo
             ListTile(
               leading: Icon(Icons.monetization_on, color: Colors.green),
-              title: Text('Solicitar Préstamo', style: TextStyle(color: Colors.black87)),
+              title: Text('Solicitar Préstamo',
+                  style: TextStyle(color: Colors.black87)),
               onTap: () {
                 Navigator.pushNamed(context, '/loanRequest');
               },
@@ -196,7 +215,8 @@ class _UserMenuState extends State<UserMenu> {
             // Ver Estado del Préstamo
             ListTile(
               leading: Icon(Icons.account_balance_wallet, color: Colors.green),
-              title: Text('Ver Estado del Préstamo', style: TextStyle(color: Colors.black87)),
+              title: Text('Ver Estado del Préstamo',
+                  style: TextStyle(color: Colors.black87)),
               onTap: () {
                 Navigator.pushNamed(context, '/loanStatus');
               },
@@ -204,14 +224,18 @@ class _UserMenuState extends State<UserMenu> {
             // Cerrar Sesión
             ListTile(
               leading: Icon(Icons.logout, color: Colors.redAccent),
-              title: Text('Cerrar Sesión', style: TextStyle(color: Colors.black87)),
+              title: Text('Cerrar Sesión',
+                  style: TextStyle(color: Colors.black87)),
               onTap: () async {
                 try {
                   await FirebaseAuth.instance.signOut();
-                  Navigator.of(context).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/login', (Route<dynamic> route) => false);
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error al cerrar sesión. Inténtalo de nuevo.')),
+                    SnackBar(
+                        content: Text(
+                            'Error al cerrar sesión. Inténtalo de nuevo.')),
                   );
                 }
               },
@@ -237,7 +261,8 @@ class _UserMenuState extends State<UserMenu> {
                 // Usar FutureBuilder para obtener el monto del préstamo
                 _buildDepositField(), // Campo de depósito en la parte superior
                 SizedBox(height: 10),
-                _buildDepositButton(context), // Botón de depósito en la parte superior
+                _buildDepositButton(
+                    context), // Botón de depósito en la parte superior
                 SizedBox(height: 20),
                 _buildDashboard(email), // Dashboard con saldo
                 SizedBox(height: 20),
@@ -276,7 +301,8 @@ class _UserMenuState extends State<UserMenu> {
           .collection('user_balances')
           .doc(userId)
           .get(),
-      builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+      builder:
+          (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return CircularProgressIndicator(); // Muestra un cargador mientras se obtiene el saldo
         }
@@ -339,87 +365,129 @@ class _UserMenuState extends State<UserMenu> {
   }
 
   Widget _buildDepositField() {
-    return TextField(
-      controller: _depositController,
-      decoration: InputDecoration(
-        labelText: 'Monto a Depositar',
-        filled: true,
-        fillColor: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.15),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        labelStyle: TextStyle(color: const Color.fromARGB(255, 12, 8, 8)),
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
       ),
-      style: TextStyle(color: Colors.white),
-      keyboardType: TextInputType.numberWithOptions(decimal: true),
+      child: TextField(
+        controller: _depositController,
+        decoration: InputDecoration(
+          labelText: 'Monto a Depositar',
+          labelStyle: TextStyle(
+            color: Colors.white70,
+            fontWeight: FontWeight.bold,
+          ),
+          prefixIcon: Icon(Icons.attach_money, color: Colors.white70),
+          border: InputBorder.none,
+        ),
+        style: TextStyle(color: Colors.white, fontSize: 18),
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
+      ),
     );
   }
 
   Widget _buildDepositButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () async {
-        final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-        double depositAmount = double.tryParse(_depositController.text) ?? 0.0;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: ElevatedButton(
+        onPressed: () async {
+          final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+          double depositAmount =
+              double.tryParse(_depositController.text) ?? 0.0;
 
-        if (depositAmount <= 0) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Ingresa un monto válido para el depósito.')),
-          );
-          return;
-        }
+          if (depositAmount <= 0) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text('Ingresa un monto válido para el depósito.')),
+            );
+            return;
+          }
 
-        try {
-          DocumentSnapshot userBalanceSnapshot = await FirebaseFirestore.instance
-              .collection('user_balances')
-              .doc(userId)
-              .get();
-
-          if (userBalanceSnapshot.exists) {
-            double currentBalance = userBalanceSnapshot.get('balance')?.toDouble() ?? 0.0;
-            double newBalance = currentBalance + depositAmount;
-
-            await FirebaseFirestore.instance
+          try {
+            DocumentSnapshot userBalanceSnapshot = await FirebaseFirestore
+                .instance
                 .collection('user_balances')
                 .doc(userId)
-                .update({'balance': newBalance});
+                .get();
 
-            // Actualizar el saldo en la vista
-            setState(() {
-              _balance = newBalance;
-            });
+            if (userBalanceSnapshot.exists) {
+              double currentBalance =
+                  userBalanceSnapshot.get('balance')?.toDouble() ?? 0.0;
+              double newBalance = currentBalance + depositAmount;
 
+              await FirebaseFirestore.instance
+                  .collection('user_balances')
+                  .doc(userId)
+                  .update({'balance': newBalance});
+
+              // Actualizar el saldo en la vista
+              setState(() {
+                _balance = newBalance;
+              });
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.green),
+                      SizedBox(width: 8),
+                      Text('Depósito realizado con éxito.'),
+                    ],
+                  ),
+                ),
+              );
+
+              _depositController
+                  .clear(); // Limpiar el campo después del depósito
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error: El balance no existe.')),
+              );
+            }
+          } catch (e) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Depósito realizado con éxito.')),
-            );
-
-            _depositController.clear(); // Limpiar el campo después del depósito
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: El balance no existe.')),
+              SnackBar(
+                  content: Text(
+                      'Error al realizar el depósito. Inténtalo de nuevo.')),
             );
           }
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error al realizar el depósito. Inténtalo de nuevo.')),
-          );
-        }
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.green,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green, // Color de fondo
+          foregroundColor: Colors.white, // Color del texto e icono
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 30),
+          elevation: 10,
+          shadowColor: Colors.greenAccent,
         ),
-        padding: EdgeInsets.symmetric(vertical: 26),
-      ),
-      child: Text(
-        'Depositar',
-        style: TextStyle(
-          fontSize: 18,
-          color: const Color.fromARGB(255, 48, 41, 41),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.upload_rounded, size: 28),
+            SizedBox(width: 10),
+            Text(
+              'Depositar',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
