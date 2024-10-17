@@ -1,5 +1,3 @@
-// archivo: lib/vista/compound_interest_rate.dart
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 

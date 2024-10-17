@@ -1,5 +1,3 @@
-// archivo: lib/vista/amortization_american.dart
-
 import 'package:flutter/material.dart';
 
 class AmortizationAmerican extends StatefulWidget {

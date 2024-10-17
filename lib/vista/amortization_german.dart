@@ -1,5 +1,3 @@
-// archivo: lib/vista/amortization_german.dart
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 
