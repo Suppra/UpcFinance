@@ -12,8 +12,10 @@ class _AmortizationGermanState extends State<AmortizationGerman> {
   final TextEditingController _principalController = TextEditingController();
   final TextEditingController _rateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
+
   List<AmortizationSchedule> _schedule = [];
 
+  // Método para calcular la tabla de amortización alemana
   void _calculateAmortization() {
     double principal = double.tryParse(_principalController.text) ?? 0.0;
     double annualRate = (double.tryParse(_rateController.text) ?? 0.0) / 100;
@@ -29,17 +31,19 @@ class _AmortizationGermanState extends State<AmortizationGerman> {
     List<AmortizationSchedule> tempSchedule = [];
 
     for (int i = 1; i <= periods; i++) {
-      double interest = remainingPrincipal * (annualRate / 12); // Pagos mensuales
+      double interest = remainingPrincipal * (annualRate / 12); // Interés mensual
       double payment = capitalPerPeriod + interest;
       remainingPrincipal -= capitalPerPeriod;
 
-      tempSchedule.add(AmortizationSchedule(
-        period: i,
-        payment: payment,
-        capital: capitalPerPeriod,
-        interest: interest,
-        remainingPrincipal: remainingPrincipal < 0 ? 0 : remainingPrincipal,
-      ));
+      tempSchedule.add(
+        AmortizationSchedule(
+          period: i,
+          payment: payment,
+          capital: capitalPerPeriod,
+          interest: interest,
+          remainingPrincipal: max(0, remainingPrincipal),
+        ),
+      );
     }
 
     setState(() {
@@ -47,6 +51,7 @@ class _AmortizationGermanState extends State<AmortizationGerman> {
     });
   }
 
+  // Método para mostrar un cuadro de alerta
   Future<void> _showAlertDialog(String message) {
     return showDialog(
       context: context,
@@ -63,6 +68,7 @@ class _AmortizationGermanState extends State<AmortizationGerman> {
     );
   }
 
+  // Genera la tabla de amortización en formato DataTable
   Widget _buildScheduleTable() {
     if (_schedule.isEmpty) {
       return Center(
@@ -78,20 +84,20 @@ class _AmortizationGermanState extends State<AmortizationGerman> {
       child: DataTable(
         columnSpacing: 20,
         columns: [
-          DataColumn(label: Text('Periodo', style: _tableHeaderStyle())),
-          DataColumn(label: Text('Pago', style: _tableHeaderStyle())),
-          DataColumn(label: Text('Capital', style: _tableHeaderStyle())),
-          DataColumn(label: Text('Interés', style: _tableHeaderStyle())),
-          DataColumn(label: Text('Principal Restante', style: _tableHeaderStyle())),
+          _buildDataColumn('Periodo'),
+          _buildDataColumn('Pago'),
+          _buildDataColumn('Capital'),
+          _buildDataColumn('Interés'),
+          _buildDataColumn('Principal Restante'),
         ],
         rows: _schedule.map((entry) {
           return DataRow(
             cells: [
-              DataCell(Text(entry.period.toString(), style: _tableCellStyle())),
-              DataCell(Text('\$${entry.payment.toStringAsFixed(2)}', style: _tableCellStyle())),
-              DataCell(Text('\$${entry.capital.toStringAsFixed(2)}', style: _tableCellStyle())),
-              DataCell(Text('\$${entry.interest.toStringAsFixed(2)}', style: _tableCellStyle())),
-              DataCell(Text('\$${entry.remainingPrincipal.toStringAsFixed(2)}', style: _tableCellStyle())),
+              _buildDataCell(entry.period.toString()),
+              _buildDataCell('\$${entry.payment.toStringAsFixed(2)}'),
+              _buildDataCell('\$${entry.capital.toStringAsFixed(2)}'),
+              _buildDataCell('\$${entry.interest.toStringAsFixed(2)}'),
+              _buildDataCell('\$${entry.remainingPrincipal.toStringAsFixed(2)}'),
             ],
           );
         }).toList(),
@@ -99,24 +105,36 @@ class _AmortizationGermanState extends State<AmortizationGerman> {
     );
   }
 
+  // Método para crear un DataColumn
+  DataColumn _buildDataColumn(String label) {
+    return DataColumn(
+      label: Text(label, style: _tableHeaderStyle()),
+    );
+  }
+
+  // Método para crear un DataCell
+  DataCell _buildDataCell(String value) {
+    return DataCell(
+      Text(value, style: _tableCellStyle()),
+    );
+  }
+
+  // Estilo para las celdas de encabezado de la tabla
+  TextStyle _tableHeaderStyle() {
+    return TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white);
+  }
+
+  // Estilo para las celdas de datos de la tabla
+  TextStyle _tableCellStyle() {
+    return TextStyle(fontSize: 16, color: Colors.white);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Fondo con degradado y opacidad
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/finances_background.png'),
-                fit: BoxFit.cover,
-                colorFilter: ColorFilter.mode(
-                  Colors.green.withOpacity(0.6),
-                  BlendMode.darken,
-                ),
-              ),
-            ),
-          ),
+          _buildBackground(),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
@@ -126,56 +144,15 @@ class _AmortizationGermanState extends State<AmortizationGerman> {
                   children: [
                     _buildBackButton(),
                     SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Icon(Icons.table_chart, color: Colors.white, size: 30),
-                        SizedBox(width: 10),
-                        Text(
-                          'Amortización Alemán',
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
+                    _buildHeader(),
                     SizedBox(height: 30),
-                    _buildTextField(
-                      label: 'Capital Inicial (P)',
-                      controller: _principalController,
-                      icon: Icons.monetization_on_outlined,
-                    ),
+                    _buildInputField('Capital Inicial (P)', _principalController, Icons.monetization_on_outlined),
                     SizedBox(height: 16),
-                    _buildTextField(
-                      label: 'Tasa de Interés Anual (%) (i)',
-                      controller: _rateController,
-                      icon: Icons.percent,
-                    ),
+                    _buildInputField('Tasa de Interés Anual (%) (i)', _rateController, Icons.percent),
                     SizedBox(height: 16),
-                    _buildTextField(
-                      label: 'Tiempo (meses) (n)',
-                      controller: _timeController,
-                      icon: Icons.timer,
-                    ),
+                    _buildInputField('Tiempo (meses) (n)', _timeController, Icons.timer),
                     SizedBox(height: 32),
-                    ElevatedButton(
-                      onPressed: _calculateAmortization,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: Text(
-                        'Calcular Amortización',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.green.shade700,
-                        ),
-                      ),
-                    ),
+                    _buildCalculateButton(),
                     SizedBox(height: 24),
                     _buildScheduleTable(),
                   ],
@@ -188,6 +165,23 @@ class _AmortizationGermanState extends State<AmortizationGerman> {
     );
   }
 
+  // Construye el fondo con degradado y opacidad
+  Widget _buildBackground() {
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/images/finances_background.png'),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(
+            Colors.green.withOpacity(0.6),
+            BlendMode.darken,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Construye el botón de regresar
   Widget _buildBackButton() {
     return Align(
       alignment: Alignment.centerLeft,
@@ -213,14 +207,7 @@ class _AmortizationGermanState extends State<AmortizationGerman> {
             children: [
               Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 22),
               SizedBox(width: 8),
-              Text(
-                'Menú Principal',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              Text('Menú Principal', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.w500)),
             ],
           ),
         ),
@@ -228,11 +215,22 @@ class _AmortizationGermanState extends State<AmortizationGerman> {
     );
   }
 
-  Widget _buildTextField({
-    required String label,
-    required TextEditingController controller,
-    required IconData icon,
-  }) {
+  // Construye el encabezado de la pantalla
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        Icon(Icons.table_chart, color: Colors.white, size: 30),
+        SizedBox(width: 10),
+        Text(
+          'Amortización Alemán',
+          style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+      ],
+    );
+  }
+
+  // Construye un campo de entrada de texto
+  Widget _buildInputField(String label, TextEditingController controller, IconData icon) {
     return TextFormField(
       controller: controller,
       keyboardType: TextInputType.number,
@@ -246,21 +244,28 @@ class _AmortizationGermanState extends State<AmortizationGerman> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
-        floatingLabelStyle: TextStyle(color: Colors.white),
       ),
       style: TextStyle(color: Colors.white),
     );
   }
 
-  TextStyle _tableHeaderStyle() {
-    return TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white);
-  }
-
-  TextStyle _tableCellStyle() {
-    return TextStyle(fontSize: 16, color: Colors.white);
+  // Botón para calcular la amortización
+  Widget _buildCalculateButton() {
+    return ElevatedButton(
+      onPressed: _calculateAmortization,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: EdgeInsets.symmetric(vertical: 16),
+      ),
+      child: Text('Calcular Amortización', style: TextStyle(fontSize: 18, color: Colors.green.shade700)),
+    );
   }
 }
 
+// Modelo para representar cada fila de la tabla de amortización
 class AmortizationSchedule {
   final int period;
   final double payment;

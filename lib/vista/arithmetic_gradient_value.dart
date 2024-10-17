@@ -1,5 +1,3 @@
-// archivo: lib/vista/arithmetic_gradient_value.dart
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -29,19 +27,20 @@ class _ArithmeticGradientValueState extends State<ArithmeticGradientValue> {
     int periods = int.tryParse(_numberOfPeriodsController.text) ?? 0;
 
     setState(() {
-      if (discountRate != 0) {
-        _presentValue = (initialPayment / discountRate) +
-            (gradient / pow(discountRate, 2)) *
-                (1 - 1 / pow(1 + discountRate, periods));
-        _futureValue = (initialPayment * pow(1 + discountRate, periods) -
-                initialPayment) /
-            discountRate +
-            (gradient *
-                    (pow(1 + discountRate, periods) -
-                        1 -
-                        discountRate * periods)) /
+      if (discountRate > 0) {
+        _presentValue = initialPayment *
+                (1 - pow(1 + discountRate, -periods)) / discountRate +
+            gradient *
+                (pow(1 + discountRate, -periods) - 1 + discountRate * periods) /
+                (pow(discountRate, 2) * pow(1 + discountRate, periods));
+
+        _futureValue = initialPayment *
+                (pow(1 + discountRate, periods) - 1) / discountRate +
+            gradient *
+                (pow(1 + discountRate, periods) - 1 - discountRate * periods) /
                 pow(discountRate, 2);
       } else {
+        // Caso especial cuando la tasa de descuento es 0
         _presentValue =
             initialPayment + gradient * (periods * (periods - 1)) / 2;
         _futureValue = initialPayment * periods +
@@ -78,7 +77,6 @@ class _ArithmeticGradientValueState extends State<ArithmeticGradientValue> {
                     // Botón para regresar al Menú Principal
                     _buildBackButton(),
                     SizedBox(height: 20),
-                    // Encabezado
                     Row(
                       children: [
                         Icon(Icons.bar_chart, color: Colors.white, size: 30),
@@ -94,7 +92,6 @@ class _ArithmeticGradientValueState extends State<ArithmeticGradientValue> {
                       ],
                     ),
                     SizedBox(height: 30),
-                    // Campos de entrada
                     _buildTextField(
                       label: 'Pago Inicial (P)',
                       controller: _initialPaymentController,
@@ -119,7 +116,6 @@ class _ArithmeticGradientValueState extends State<ArithmeticGradientValue> {
                       icon: Icons.timer,
                     ),
                     SizedBox(height: 32),
-                    // Botón de Cálculo
                     ElevatedButton(
                       onPressed: _calculateValues,
                       style: ElevatedButton.styleFrom(
@@ -138,7 +134,6 @@ class _ArithmeticGradientValueState extends State<ArithmeticGradientValue> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    // Resultados
                     Center(
                       child: Text(
                         'Valor Presente (PV): ${_presentValue.toStringAsFixed(2)}',
@@ -170,7 +165,6 @@ class _ArithmeticGradientValueState extends State<ArithmeticGradientValue> {
     );
   }
 
-  // Método para crear campos de texto personalizados
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
@@ -195,7 +189,6 @@ class _ArithmeticGradientValueState extends State<ArithmeticGradientValue> {
     );
   }
 
-  // Método para crear el botón de regreso elegante
   Widget _buildBackButton() {
     return Align(
       alignment: Alignment.centerLeft,

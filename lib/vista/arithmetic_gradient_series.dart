@@ -1,5 +1,3 @@
-// archivo: lib/vista/arithmetic_gradient_series.dart
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -10,30 +8,33 @@ class ArithmeticGradientSeries extends StatefulWidget {
 }
 
 class _ArithmeticGradientSeriesState extends State<ArithmeticGradientSeries> {
-  final TextEditingController _presentValueController = TextEditingController();
-  final TextEditingController _futureValueController = TextEditingController();
   final TextEditingController _gradientController = TextEditingController();
   final TextEditingController _discountRateController = TextEditingController();
   final TextEditingController _numberOfPeriodsController =
       TextEditingController();
 
-  double _seriesValue = 0.0;
+  double _presentValue = 0.0;
+  double _futureValue = 0.0;
 
-  void _calculateSeriesValue() {
-    double presentValue = double.tryParse(_presentValueController.text) ?? 0.0;
+  void _calculateValues() {
     double gradient = double.tryParse(_gradientController.text) ?? 0.0;
     double discountRate =
         (double.tryParse(_discountRateController.text) ?? 0.0) / 100;
     int periods = int.tryParse(_numberOfPeriodsController.text) ?? 0;
 
     setState(() {
-      if (discountRate != 0) {
-        _seriesValue = presentValue +
-            (gradient / pow(discountRate, 2)) *
-                (1 - 1 / pow(1 + discountRate, periods));
+      if (discountRate > 0) {
+        _presentValue = gradient *
+            ((pow(1 + discountRate, periods) - discountRate * periods - 1) /
+                (pow(discountRate, 2) * pow(1 + discountRate, periods)));
+
+        _futureValue = gradient *
+            ((pow(1 + discountRate, periods) - 1 - discountRate * periods) /
+                pow(discountRate, 2));
       } else {
-        _seriesValue =
-            presentValue + gradient * (periods * (periods - 1)) / 2;
+        // Caso especial: Tasa de descuento es 0
+        _presentValue = gradient * (periods * (periods - 1)) / 2;
+        _futureValue = gradient * (periods * (periods - 1)) / 2;
       }
     });
   }
@@ -66,7 +67,6 @@ class _ArithmeticGradientSeriesState extends State<ArithmeticGradientSeries> {
                     // Botón de regreso
                     _buildBackButton(),
                     SizedBox(height: 20),
-                    // Encabezado
                     Row(
                       children: [
                         Icon(Icons.stacked_line_chart,
@@ -85,12 +85,6 @@ class _ArithmeticGradientSeriesState extends State<ArithmeticGradientSeries> {
                     SizedBox(height: 30),
                     // Campos de entrada
                     _buildTextField(
-                      label: 'Valor Presente (PV)',
-                      controller: _presentValueController,
-                      icon: Icons.monetization_on_outlined,
-                    ),
-                    SizedBox(height: 16),
-                    _buildTextField(
                       label: 'Gradiente Aritmético (G)',
                       controller: _gradientController,
                       icon: Icons.trending_up,
@@ -108,9 +102,8 @@ class _ArithmeticGradientSeriesState extends State<ArithmeticGradientSeries> {
                       icon: Icons.timer,
                     ),
                     SizedBox(height: 32),
-                    // Botón de Cálculo
                     ElevatedButton(
-                      onPressed: _calculateSeriesValue,
+                      onPressed: _calculateValues,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
@@ -119,7 +112,7 @@ class _ArithmeticGradientSeriesState extends State<ArithmeticGradientSeries> {
                         padding: EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: Text(
-                        'Calcular Valor de la Serie',
+                        'Calcular Valores',
                         style: TextStyle(
                           fontSize: 18,
                           color: Colors.green.shade700,
@@ -127,10 +120,22 @@ class _ArithmeticGradientSeriesState extends State<ArithmeticGradientSeries> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    // Resultado del valor de la serie
+                    // Resultado del Valor Presente
                     Center(
                       child: Text(
-                        'Valor de la Serie (SV): ${_seriesValue.toStringAsFixed(2)}',
+                        'Valor Presente (PV): ${_presentValue.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    // Resultado del Valor Futuro
+                    Center(
+                      child: Text(
+                        'Valor Futuro (FV): ${_futureValue.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -148,7 +153,6 @@ class _ArithmeticGradientSeriesState extends State<ArithmeticGradientSeries> {
     );
   }
 
-  // Método para crear campos de texto personalizados
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
@@ -173,7 +177,6 @@ class _ArithmeticGradientSeriesState extends State<ArithmeticGradientSeries> {
     );
   }
 
-  // Botón de regreso elegante
   Widget _buildBackButton() {
     return Align(
       alignment: Alignment.centerLeft,

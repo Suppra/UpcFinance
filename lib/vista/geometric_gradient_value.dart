@@ -1,5 +1,3 @@
-// archivo: lib/vista/geometric_gradient_value.dart
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -25,17 +23,13 @@ class _GeometricGradientValueState extends State<GeometricGradientValue> {
 
     setState(() {
       if (discountRate != growthRate) {
-        _presentValue = (initialPayment / discountRate) +
-            (growthRate / pow(discountRate, 2)) *
-                (1 - 1 / pow(1 + discountRate, periods));
-        _futureValue = (initialPayment * pow(1 + growthRate, periods) -
-                initialPayment) /
-            growthRate +
-            (initialPayment * growthRate * (pow(1 + growthRate, periods) - 1)) /
-                pow(growthRate, 2);
+        _presentValue = (initialPayment / (discountRate - growthRate)) *
+            (1 - pow((1 + growthRate) / (1 + discountRate), periods));
+        _futureValue = (initialPayment * pow(1 + discountRate, periods)) /
+            (discountRate - growthRate) *
+            (pow((1 + growthRate) / (1 + discountRate), periods) - 1);
       } else {
-        _presentValue =
-            initialPayment * periods * pow(1 + discountRate, periods - 1);
+        _presentValue = initialPayment * periods / (1 + discountRate);
         _futureValue = initialPayment * periods * pow(1 + growthRate, periods);
       }
     });
@@ -68,7 +62,6 @@ class _GeometricGradientValueState extends State<GeometricGradientValue> {
                   children: [
                     _buildBackButton(),
                     SizedBox(height: 20),
-                    // Encabezado
                     Row(
                       children: [
                         Icon(Icons.bar_chart, color: Colors.white, size: 30),
@@ -84,7 +77,6 @@ class _GeometricGradientValueState extends State<GeometricGradientValue> {
                       ],
                     ),
                     SizedBox(height: 30),
-                    // Campos de entrada
                     _buildTextField(
                       label: 'Pago Inicial (P)',
                       controller: _initialPaymentController,
@@ -109,7 +101,6 @@ class _GeometricGradientValueState extends State<GeometricGradientValue> {
                       icon: Icons.timer,
                     ),
                     SizedBox(height: 32),
-                    // Botón de cálculo
                     ElevatedButton(
                       onPressed: _calculateValues,
                       style: ElevatedButton.styleFrom(
@@ -128,7 +119,6 @@ class _GeometricGradientValueState extends State<GeometricGradientValue> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    // Resultados
                     Center(
                       child: Text(
                         'Valor Presente (PV): ${_presentValue.toStringAsFixed(2)}',
@@ -160,7 +150,6 @@ class _GeometricGradientValueState extends State<GeometricGradientValue> {
     );
   }
 
-  // Método para crear campos de texto personalizados
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
@@ -185,7 +174,6 @@ class _GeometricGradientValueState extends State<GeometricGradientValue> {
     );
   }
 
-  // Botón de regreso elegante y minimalista
   Widget _buildBackButton() {
     return Align(
       alignment: Alignment.centerLeft,

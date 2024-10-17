@@ -9,7 +9,6 @@ class GeometricGradientSeries extends StatefulWidget {
 
 class _GeometricGradientSeriesState extends State<GeometricGradientSeries> {
   final TextEditingController _presentValueController = TextEditingController();
-  final TextEditingController _futureValueController = TextEditingController();
   final TextEditingController _growthRateController = TextEditingController();
   final TextEditingController _discountRateController = TextEditingController();
   final TextEditingController _numberOfPeriodsController =
@@ -18,7 +17,8 @@ class _GeometricGradientSeriesState extends State<GeometricGradientSeries> {
   double _seriesValue = 0.0;
 
   void _calculateSeriesValue() {
-    double presentValue = double.tryParse(_presentValueController.text) ?? 0.0;
+    double initialPayment =
+        double.tryParse(_presentValueController.text) ?? 0.0;
     double growthRate =
         (double.tryParse(_growthRateController.text) ?? 0.0) / 100;
     double discountRate =
@@ -27,12 +27,11 @@ class _GeometricGradientSeriesState extends State<GeometricGradientSeries> {
 
     setState(() {
       if (discountRate != growthRate) {
-        _seriesValue = presentValue +
-            (growthRate / pow(discountRate, 2)) *
-                (1 - 1 / pow(1 + discountRate, periods));
+        _seriesValue = (initialPayment / (discountRate - growthRate)) *
+            (1 - pow((1 + growthRate) / (1 + discountRate), periods));
       } else {
-        _seriesValue = presentValue +
-            growthRate * (pow(1 + discountRate, periods) - 1) / discountRate;
+        _seriesValue = initialPayment * periods /
+            (1 + discountRate); // Ajuste para i = g
       }
     });
   }
@@ -62,10 +61,8 @@ class _GeometricGradientSeriesState extends State<GeometricGradientSeries> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Botón de regreso
                     _buildBackButton(),
                     SizedBox(height: 20),
-                    // Encabezado
                     Row(
                       children: [
                         Icon(Icons.show_chart, color: Colors.white, size: 30),
@@ -83,17 +80,10 @@ class _GeometricGradientSeriesState extends State<GeometricGradientSeries> {
                       ],
                     ),
                     SizedBox(height: 30),
-                    // Campos de entrada
                     _buildTextField(
-                      label: 'Valor Presente (PV)',
+                      label: 'Pago Inicial (P1)',
                       controller: _presentValueController,
                       icon: Icons.monetization_on_outlined,
-                    ),
-                    SizedBox(height: 16),
-                    _buildTextField(
-                      label: 'Valor Futuro (FV)',
-                      controller: _futureValueController,
-                      icon: Icons.attach_money,
                     ),
                     SizedBox(height: 16),
                     _buildTextField(
@@ -114,7 +104,6 @@ class _GeometricGradientSeriesState extends State<GeometricGradientSeries> {
                       icon: Icons.timer,
                     ),
                     SizedBox(height: 32),
-                    // Botón de cálculo
                     ElevatedButton(
                       onPressed: _calculateSeriesValue,
                       style: ElevatedButton.styleFrom(
@@ -133,7 +122,6 @@ class _GeometricGradientSeriesState extends State<GeometricGradientSeries> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    // Resultado
                     Center(
                       child: Text(
                         'Valor de la Serie (SV): ${_seriesValue.toStringAsFixed(2)}',
@@ -154,7 +142,6 @@ class _GeometricGradientSeriesState extends State<GeometricGradientSeries> {
     );
   }
 
-  // Campo de texto personalizado
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
@@ -179,7 +166,6 @@ class _GeometricGradientSeriesState extends State<GeometricGradientSeries> {
     );
   }
 
-  // Botón de regreso elegante
   Widget _buildBackButton() {
     return Align(
       alignment: Alignment.topLeft,
